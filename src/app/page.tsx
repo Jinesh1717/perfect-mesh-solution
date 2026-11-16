@@ -1,5 +1,8 @@
 'use client';
 
+import GlobalCanvas from '@/components/3d/GlobalCanvas';
+import Preloader from '@/components/ui/Preloader';
+import FloatingCTA from '@/components/ui/FloatingCTA';
 import Hero from '@/components/sections/Hero';
 import TrustBar from '@/components/sections/TrustBar';
 import MosquitoWindowScroll from '@/components/sections/MosquitoWindowScroll';
@@ -14,18 +17,23 @@ import Footer from '@/components/Footer';
 
 export default function Home() {
   return (
-    <main className="relative w-full overflow-x-clip bg-[#070809] text-[#f4f4f5]">
-      <Hero />
-      <TrustBar />
-      <MosquitoWindowScroll />
-      <ProductStory />
-      <Experience />
-      <Categories />
-      <Showcase />
-      <InstallationProcess />
-      <Calculator />
-      <Contact />
-      <Footer />
-    </main>
+    <>
+      <Preloader />
+      <GlobalCanvas />
+      <FloatingCTA />
+      <main className="relative w-full overflow-x-clip bg-transparent text-[#f4f4f5]">
+        <Hero />
+        <TrustBar />
+        <MosquitoWindowScroll />
+        <ProductStory />
+        <Experience />
+        <Categories />
+        <Showcase />
+        <InstallationProcess />
+        <Calculator />
+        <Contact />
+        <Footer />
+      </main>
+    </>
   );
 }

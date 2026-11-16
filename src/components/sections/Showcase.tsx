@@ -2,7 +2,9 @@
 
 import { useState, useRef, useEffect } from 'react';
 import Image from 'next/image';
-import { Eye, Star, MapPin } from 'lucide-react';
+import { Eye, Star, MapPin, MoveHorizontal } from 'lucide-react';
+import { useSceneStore } from '@/lib/useSceneStore';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
 const testimonials = [
   {
@@ -27,8 +29,21 @@ const testimonials = [
 
 export default function Showcase() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const sectionRef = useRef<HTMLElement>(null);
   const [sliderPosition, setSliderPosition] = useState(50);
   const isDragging = useRef(false);
+  const setStage = useSceneStore((s) => s.setStage);
+
+  useEffect(() => {
+    if (!sectionRef.current) return;
+    const trigger = ScrollTrigger.create({
+      trigger: sectionRef.current,
+      start: 'top 70%',
+      onEnter: () => setStage('hidden'),
+      onLeaveBack: () => setStage('product'),
+    });
+    return () => trigger.kill();
+  }, [setStage]);
 
   const handlePointerDown = () => {
     isDragging.current = true;
@@ -53,12 +68,12 @@ export default function Showcase() {
   }, []);
 
   return (
-    <section className="py-28 md:py-36 bg-[#080808] relative overflow-hidden border-t border-white/[0.06] w-full" id="showcase">
+    <section ref={sectionRef} className="py-16 md:py-24 bg-[#080808] relative overflow-hidden border-t border-white/[0.06] w-full" id="showcase">
       <div className="max-w-7xl mx-auto px-6 w-full">
         {/* Header */}
-        <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/[0.04] border border-white/10 text-xs font-mono uppercase tracking-[0.2em] text-zinc-400 mb-4">
-            <Eye size={12} className="text-zinc-300" />
+        <div className="text-center mb-12 md:mb-16">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/10 text-xs font-mono uppercase tracking-[0.2em] text-zinc-300 mb-4">
+            <Eye size={14} className="text-emerald-400" />
             <span>Interactive Comparison</span>
           </div>
           <h2 className="text-3xl sm:text-5xl md:text-6xl font-black text-white tracking-tight leading-[1.08]">
@@ -71,12 +86,12 @@ export default function Showcase() {
           </p>
         </div>
 
-        {/* Before / After Interactive Slider */}
-        <div className="max-w-4xl mx-auto mb-24">
+        {/* Before / After Interactive Slider - Wider & Immersive */}
+        <div className="max-w-6xl mx-auto mb-16 md:mb-20">
           <div
             ref={containerRef}
             onPointerDown={handlePointerDown}
-            className="relative h-[340px] sm:h-[450px] md:h-[520px] rounded-3xl overflow-hidden border border-white/15 select-none touch-none shadow-2xl cursor-ew-resize bg-black"
+            className="relative h-[380px] sm:h-[480px] md:h-[580px] lg:h-[620px] rounded-3xl overflow-hidden border border-white/20 select-none touch-none shadow-2xl cursor-ew-resize bg-black"
           >
             {/* After Image (Full Background) */}
             <div className="absolute inset-0">
@@ -84,31 +99,31 @@ export default function Showcase() {
                 src="/after.png"
                 alt="After: Perfect Mesh Invisible Protection Installed"
                 fill
-                sizes="(max-width: 768px) 100vw, 896px"
+                sizes="(max-width: 1280px) 100vw, 1152px"
                 className="object-cover"
                 priority
               />
-              <div className="absolute bottom-6 right-6 px-4 py-1.5 rounded-full bg-black/70 backdrop-blur-md border border-white/15 text-xs font-mono uppercase tracking-widest text-emerald-400 pointer-events-none">
+              <div className="absolute bottom-6 right-6 px-4 py-2 rounded-xl bg-black/80 backdrop-blur-md border border-white/20 text-xs sm:text-sm font-mono uppercase tracking-widest text-emerald-400 font-semibold pointer-events-none shadow-lg">
                 After: Perfect Mesh Installed
               </div>
             </div>
 
             {/* Before Image (Clipped Left Side) */}
             <div
-              className="absolute inset-y-0 left-0 overflow-hidden border-r-2 border-white shadow-[0_0_20px_rgba(255,255,255,0.4)]"
+              className="absolute inset-y-0 left-0 overflow-hidden border-r-2 border-white shadow-[0_0_25px_rgba(255,255,255,0.6)]"
               style={{ width: `${sliderPosition}%` }}
             >
-              <div className="relative w-full h-full">
+              <div className="relative w-full h-full min-w-[340px] sm:min-w-[700px] md:min-w-[1000px]">
                 <Image
                   src="/before.png"
                   alt="Before: Vulnerable open doorway without mesh"
                   fill
-                  sizes="(max-width: 768px) 100vw, 896px"
+                  sizes="(max-width: 1280px) 100vw, 1152px"
                   className="object-cover object-left"
                   priority
                 />
               </div>
-              <div className="absolute bottom-6 left-6 px-4 py-1.5 rounded-full bg-black/70 backdrop-blur-md border border-white/15 text-xs font-mono uppercase tracking-widest text-zinc-300 pointer-events-none">
+              <div className="absolute bottom-6 left-6 px-4 py-2 rounded-xl bg-black/80 backdrop-blur-md border border-white/20 text-xs sm:text-sm font-mono uppercase tracking-widest text-amber-300 font-semibold pointer-events-none shadow-lg">
                 Before: Vulnerable Opening
               </div>
             </div>
@@ -118,13 +133,14 @@ export default function Showcase() {
               className="absolute inset-y-0 -translate-x-1/2 flex items-center justify-center pointer-events-none z-20"
               style={{ left: `${sliderPosition}%` }}
             >
-              <div className="w-10 h-10 rounded-full bg-white text-black shadow-[0_0_25px_rgba(0,0,0,0.8)] flex items-center justify-center text-xs font-bold border border-white/80">
-                ⟷
+              <div className="w-12 h-12 rounded-full bg-white text-zinc-900 shadow-[0_0_30px_rgba(0,0,0,0.9)] flex items-center justify-center border-2 border-white/90">
+                <MoveHorizontal size={22} className="stroke-[2.5]" />
               </div>
             </div>
           </div>
 
-          <div className="flex items-center justify-center gap-2 mt-4 text-xs font-mono uppercase tracking-widest text-zinc-500">
+          <div className="flex items-center justify-center gap-2 mt-4 text-xs sm:text-sm font-mono uppercase tracking-widest text-zinc-400">
+            <MoveHorizontal size={14} className="text-zinc-500" />
             <span>Drag slider horizontally to inspect optical clarity</span>
           </div>
         </div>

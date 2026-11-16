@@ -40,13 +40,13 @@ const STEPS = [
 
 export default function InstallationProcess() {
   return (
-    <section className="py-28 md:py-36 bg-[#080808] relative overflow-hidden border-t border-white/[0.06] w-full">
+    <section className="py-16 md:py-20 bg-[#080808] relative overflow-hidden border-t border-white/[0.06] w-full">
       {/* Background illumination constrained to max width */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] max-w-full h-[300px] bg-white/[0.02] blur-[140px] pointer-events-none overflow-hidden" />
 
       <div className="max-w-7xl mx-auto px-6 relative z-10 w-full">
-        <div className="text-center mb-20">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/[0.04] border border-white/10 text-xs font-mono uppercase tracking-[0.2em] text-zinc-400 mb-4">
+        <div className="text-center mb-12 md:mb-14">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/10 text-xs font-mono uppercase tracking-[0.2em] text-zinc-300 mb-4">
             <span>The Fabrication Journey</span>
           </div>
           <h2 className="text-3xl sm:text-5xl md:text-6xl font-black text-white tracking-tight leading-[1.08]">

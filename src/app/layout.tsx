@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import Navbar from "@/components/Navbar";
 import ChatWidget from "@/components/chat/ChatWidget";
+import SmoothScrollProvider from "@/components/providers/SmoothScrollProvider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -118,9 +119,11 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-full flex flex-col font-sans selection:bg-zinc-200 selection:text-black relative bg-[#070809] text-[#f4f4f5]">
-        <Navbar />
-        {children}
-        <ChatWidget />
+        <SmoothScrollProvider>
+          <Navbar />
+          {children}
+          <ChatWidget />
+        </SmoothScrollProvider>
       </body>
     </html>
   );

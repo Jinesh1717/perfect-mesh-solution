@@ -1,185 +1,132 @@
 'use client';
 
-import { useRef } from 'react';
-import { motion, useScroll, useTransform } from 'framer-motion';
-import { Layers } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Layers, ShieldCheck, Cog, Maximize2 } from 'lucide-react';
+import { useSceneStore } from '@/lib/useSceneStore';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+const STAGES = [
+  {
+    step: '01',
+    name: 'Structural Frame',
+    icon: Layers,
+    title: 'Laser-Mitered 6063-T6 Aluminium Frame',
+    detail: 'Extruded aerospace alloy with internal reinforced corner cleats and AkzoNobel powder coating.',
+  },
+  {
+    step: '02',
+    name: 'Precision Expansion',
+    icon: Maximize2,
+    title: 'Four-Point Precision Reveal Calibration',
+    detail: 'Machined to ±0.5mm site survey dimensions, creating a snug acoustic and vibration-free perimeter fit.',
+  },
+  {
+    step: '03',
+    name: 'Marine-Grade Mesh',
+    icon: ShieldCheck,
+    title: 'High-Tensile 316 Stainless Wire Cloth',
+    detail: 'Pneumatically tensioned micro-weave blocks 100% of mosquitoes while permitting 98% unimpeded airflow.',
+  },
+  {
+    step: '04',
+    name: 'Silent Glide Rollers',
+    icon: Cog,
+    title: 'Concealed Multi-Point Locks & Rollers',
+    detail: 'Ultra-smooth stainless ball-bearing cartridges gliding silently across an extruded double bottom track.',
+  },
+];
 
 export default function ProductStory() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ['start start', 'end end'],
-  });
+  const setStage = useSceneStore((s) => s.setStage);
+  const setExplodeProgress = useSceneStore((s) => s.setExplodeProgress);
+  const [activeStageIdx, setActiveStageIdx] = useState(0);
 
-  // Stage typography opacities (calibrated for 250vh track)
-  const text1Opacity = useTransform(scrollYProgress, [0.0, 0.08, 0.22, 0.28], [0, 1, 1, 0]);
-  const text2Opacity = useTransform(scrollYProgress, [0.26, 0.33, 0.47, 0.53], [0, 1, 1, 0]);
-  const text3Opacity = useTransform(scrollYProgress, [0.51, 0.58, 0.72, 0.78], [0, 1, 1, 0]);
-  const text4Opacity = useTransform(scrollYProgress, [0.76, 0.83, 0.98, 1.0], [0, 1, 1, 1]);
+  useEffect(() => {
+    if (!containerRef.current) return;
 
-  // Exploded frame motion values
-  const frameScale = useTransform(scrollYProgress, [0.0, 0.25], [1, 1.05]);
-  const frameSplitLeft = useTransform(scrollYProgress, [0.24, 0.52], [0, -110]);
-  const frameSplitRight = useTransform(scrollYProgress, [0.24, 0.52], [0, 110]);
-  const frameSplitTop = useTransform(scrollYProgress, [0.24, 0.52], [0, -65]);
-  const frameSplitBottom = useTransform(scrollYProgress, [0.24, 0.52], [0, 65]);
+    const trigger = ScrollTrigger.create({
+      trigger: containerRef.current,
+      start: 'top top',
+      end: 'bottom bottom',
+      scrub: 0.8,
+      onEnter: () => setStage('exploded'),
+      onEnterBack: () => setStage('exploded'),
+      onUpdate: (self) => {
+        setExplodeProgress(self.progress);
+        const stageIndex = Math.min(
+          3,
+          Math.floor(self.progress * 4)
+        );
+        setActiveStageIdx(stageIndex);
+      },
+    });
 
-  // Mesh layer
-  const meshOpacity = useTransform(scrollYProgress, [0.42, 0.54, 0.82], [0.2, 1, 1]);
-  const meshScale = useTransform(scrollYProgress, [0.42, 0.54], [0.92, 1.04]);
+    return () => trigger.kill();
+  }, [setStage, setExplodeProgress]);
 
-  // Lock and roller mechanism
-  const lockOpacity = useTransform(scrollYProgress, [0.68, 0.80], [0, 1]);
-  const lockScale = useTransform(scrollYProgress, [0.68, 0.80], [0.6, 1]);
+  const currentStage = STAGES[activeStageIdx];
 
   return (
-    <section ref={containerRef} className="relative h-[250vh] bg-[#080808] w-full" id="craftsmanship">
-      {/* Blueprint Grid Atmosphere */}
-      <div className="absolute inset-0 bg-[radial-gradient(#27272a_1px,transparent_1px)] [background-size:32px_32px] opacity-25 pointer-events-none" />
-
-      {/* Sticky Presentation Viewport */}
-      <div className="sticky top-0 h-[100dvh] w-full flex flex-col items-center justify-center overflow-hidden select-none">
+    <section ref={containerRef} className="relative h-[250vh] bg-transparent w-full" id="anatomy">
+      <div id="craftsmanship" className="sr-only" />
+      {/* Sticky 100svh Presentation Viewport */}
+      <div className="sticky top-0 h-[100svh] w-full flex flex-col justify-between p-4 sm:p-8 md:p-10 overflow-hidden select-none">
         
-        {/* Top Header Badge & Stage Pills */}
-        <div className="absolute top-20 sm:top-24 z-20 text-center px-6">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/[0.04] border border-white/10 text-xs font-mono uppercase tracking-[0.2em] text-zinc-400 mb-2">
+        {/* Top Header Badge & Stage Navigation (Cleanly positioned below navbar) */}
+        <div className="relative z-10 text-center pt-16 sm:pt-20 pointer-events-none">
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/[0.04] border border-white/10 text-xs font-mono uppercase tracking-[0.2em] text-zinc-300 mb-2">
             <Layers size={13} className="text-zinc-300" />
-            <span>Precision Engineering</span>
+            <span>Precision Engineering Dissection</span>
           </div>
-          <h2 className="text-2xl sm:text-4xl font-black text-white tracking-tight">
+          <h2 className="text-xl sm:text-4xl md:text-5xl font-black text-white tracking-tight drop-shadow-2xl">
             The Anatomy of Protection
           </h2>
 
-          {/* Dynamic Active Step Indicators */}
-          <div className="flex items-center justify-center gap-2 mt-3">
-            {[
-              { label: '01 Frame', op: text1Opacity },
-              { label: '02 Reveal', op: text2Opacity },
-              { label: '03 Micro-Mesh', op: text3Opacity },
-              { label: '04 Hardware', op: text4Opacity },
-            ].map((step, idx) => (
-              <motion.span
-                key={idx}
-                style={{ opacity: step.op }}
-                className="text-[10px] font-mono uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-white/10 text-white border border-white/20"
+          {/* Interactive Stage Progress Bar */}
+          <div className="flex items-center justify-center gap-2 sm:gap-3 mt-3 sm:mt-4 pointer-events-auto">
+            {STAGES.map((s, idx) => (
+              <div
+                key={s.step}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-mono transition-all duration-300 ${
+                  activeStageIdx === idx
+                    ? 'bg-white text-black font-bold shadow-[0_0_15px_rgba(255,255,255,0.3)] scale-105'
+                    : 'bg-white/[0.04] text-zinc-400 border border-white/10'
+                }`}
               >
-                {step.label}
-              </motion.span>
+                <span>{s.step}</span>
+                <span className="hidden sm:inline">{s.name}</span>
+              </div>
             ))}
           </div>
         </div>
 
-        {/* 2D Exploded Mechanical View Component */}
-        <div className="relative w-64 h-96 sm:w-80 sm:h-[440px] md:w-96 md:h-[480px] z-10 flex items-center justify-center mt-[-2vh]">
-          {/* Layer 02: High-Tensile Mesh Screen */}
-          <motion.div
-            className="absolute inset-4 rounded flex items-center justify-center"
-            style={{
-              opacity: meshOpacity,
-              scale: meshScale,
-              background:
-                'radial-gradient(circle, rgba(255,255,255,0.18) 15%, transparent 15%), radial-gradient(circle, rgba(255,255,255,0.18) 15%, transparent 15%)',
-              backgroundSize: '5px 5px',
-              backgroundPosition: '0 0, 2.5px 2.5px',
-              border: '1.5px solid rgba(255,255,255,0.25)',
-              boxShadow: '0 0 40px rgba(255,255,255,0.08) inset',
-            }}
-          >
-            <div className="w-full h-full bg-gradient-to-tr from-white/10 via-transparent to-white/5 mix-blend-overlay" />
-            <div className="absolute text-[10px] font-mono uppercase tracking-widest text-zinc-300 bg-black/80 px-3 py-1 rounded border border-white/15">
-              316-Stainless Micro-Weave
-            </div>
-          </motion.div>
-
-          {/* Layer 01: Exploded Outer Aluminium Structural Casings */}
-          <motion.div
-            className="absolute inset-0 drop-shadow-[0_20px_50px_rgba(0,0,0,0.9)]"
-            style={{ scale: frameScale }}
-          >
-            {/* Left Vertical Frame Section */}
+        {/* Dynamic Synchronized Exploded Stage Typography (Cleanly positioned at bottom with safe bounds) */}
+        <div className="relative z-10 w-full max-w-2xl mx-auto text-center pb-4 sm:pb-6 mb-2 sm:mb-4 pointer-events-auto">
+          <AnimatePresence mode="wait">
             <motion.div
-              className="absolute top-0 bottom-0 left-0 w-7 md:w-9 rounded-l-md z-20 overflow-hidden shadow-2xl border-y border-l border-white/20"
-              style={{
-                x: frameSplitLeft,
-                background: 'linear-gradient(90deg, #111 0%, #2a2c30 40%, #4a4e56 50%, #2a2c30 60%, #111 100%)',
-              }}
+              key={currentStage.step}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
+              className="p-4 sm:p-6 rounded-3xl bg-[#0e1013]/92 border border-white/20 backdrop-blur-2xl shadow-[0_20px_50px_rgba(0,0,0,0.85)]"
             >
-              <div className="absolute inset-x-0 inset-y-2 bg-gradient-to-r from-transparent via-white/15 to-transparent" />
+              <div className="inline-flex items-center gap-2 text-xs font-mono uppercase tracking-widest text-emerald-400 mb-1.5">
+                <span>Stage {currentStage.step} of 04</span>
+                <span>•</span>
+                <span>{currentStage.name}</span>
+              </div>
+              <h3 className="text-lg sm:text-2xl md:text-3xl font-bold tracking-tight text-white leading-tight">
+                {currentStage.title}
+              </h3>
+              <p className="text-zinc-300 text-xs sm:text-sm md:text-base font-light mt-2 leading-relaxed">
+                {currentStage.detail}
+              </p>
             </motion.div>
-
-            {/* Right Vertical Frame Section */}
-            <motion.div
-              className="absolute top-0 bottom-0 right-0 w-7 md:w-9 rounded-r-md z-20 overflow-hidden shadow-2xl border-y border-r border-white/20"
-              style={{
-                x: frameSplitRight,
-                background: 'linear-gradient(90deg, #111 0%, #2a2c30 40%, #4a4e56 50%, #2a2c30 60%, #111 100%)',
-              }}
-            >
-              <div className="absolute inset-x-0 inset-y-2 bg-gradient-to-r from-transparent via-white/15 to-transparent" />
-            </motion.div>
-
-            {/* Top Horizontal Header Section */}
-            <motion.div
-              className="absolute top-0 left-7 right-7 md:left-9 md:right-9 h-7 md:h-9 shadow-xl z-20 overflow-hidden border-x border-t border-white/20"
-              style={{
-                y: frameSplitTop,
-                background: 'linear-gradient(180deg, #3a3d44 0%, #5a5f6a 20%, #222428 50%, #111 100%)',
-              }}
-            >
-              <div className="w-full h-[2px] bg-white/40 absolute top-0" />
-            </motion.div>
-
-            {/* Bottom Horizontal Sill Section */}
-            <motion.div
-              className="absolute bottom-0 left-7 right-7 md:left-9 md:right-9 h-7 md:h-9 shadow-xl z-20 overflow-hidden border-x border-b border-white/20"
-              style={{
-                y: frameSplitBottom,
-                background: 'linear-gradient(0deg, #111 0%, #222428 20%, #3a3d44 80%, #5a5f6a 100%)',
-              }}
-            >
-              <div className="w-full h-[1px] bg-white/30 absolute bottom-0" />
-            </motion.div>
-          </motion.div>
-
-          {/* Layer 03: Recessed Lock Mechanism & Silent Rollers */}
-          <motion.div
-            className="absolute top-1/2 right-[-24px] md:right-[-36px] w-14 md:w-16 h-32 md:h-40 bg-[#16181b] rounded-lg flex flex-col items-center justify-center -translate-y-1/2 border border-zinc-600/60 z-30 shadow-[0_0_50px_rgba(255,255,255,0.15)] overflow-hidden"
-            style={{ opacity: lockOpacity, scale: lockScale, x: frameSplitRight }}
-          >
-            <div className="absolute inset-0 bg-gradient-to-tr from-transparent via-white/15 to-transparent pointer-events-none" />
-            <div className="w-2.5 md:w-3.5 h-14 md:h-18 bg-[#0a0a0c] rounded-sm shadow-inner mb-3 border border-t-black border-b-white/30" />
-            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-zinc-200 to-zinc-500 shadow-lg border border-zinc-300 flex items-center justify-center">
-              <div className="w-2.5 h-2.5 rounded-full bg-black/80" />
-            </div>
-            <span className="text-[9px] font-mono text-zinc-400 uppercase tracking-widest mt-2">LOCK</span>
-          </motion.div>
-        </div>
-
-        {/* Dynamic Synchronized Exploded Stage Typography */}
-        <div className="absolute bottom-12 sm:bottom-16 w-full px-6 flex justify-center z-20 pointer-events-none">
-          <motion.div style={{ opacity: text1Opacity }} className="absolute text-center max-w-lg">
-            <span className="text-xs font-mono uppercase tracking-[0.25em] text-zinc-400">Stage 01</span>
-            <h3 className="text-2xl sm:text-4xl font-bold tracking-tight text-white mt-1">Laser-Mitered Aluminium Frame</h3>
-            <p className="text-zinc-400 mt-2 text-sm sm:text-base font-light">Structural 6063-T6 architectural alloy with invisible corner cleats and scratch-proof electro-coating.</p>
-          </motion.div>
-
-          <motion.div style={{ opacity: text2Opacity }} className="absolute text-center max-w-lg">
-            <span className="text-xs font-mono uppercase tracking-[0.25em] text-zinc-400">Stage 02</span>
-            <h3 className="text-2xl sm:text-4xl font-bold tracking-tight text-white mt-1">Four-Point Dimensional Expansion</h3>
-            <p className="text-zinc-400 mt-2 text-sm sm:text-base font-light">Precision cut to ±0.5mm site measurements, ensuring a snug rattle-free acoustic seal across all window styles.</p>
-          </motion.div>
-
-          <motion.div style={{ opacity: text3Opacity }} className="absolute text-center max-w-lg">
-            <span className="text-xs font-mono uppercase tracking-[0.25em] text-zinc-400">Stage 03</span>
-            <h3 className="text-2xl sm:text-4xl font-bold tracking-tight text-white mt-1">Marine-Grade 316 Micro-Mesh</h3>
-            <p className="text-zinc-300 mt-2 text-sm sm:text-base font-light">Blocks 100% of mosquitoes and tiny midges while allowing 98% unobstructed airflow and optical daylight.</p>
-          </motion.div>
-
-          <motion.div style={{ opacity: text4Opacity }} className="absolute text-center max-w-lg">
-            <span className="text-xs font-mono uppercase tracking-[0.25em] text-emerald-400">Stage 04</span>
-            <h3 className="text-2xl sm:text-4xl font-bold tracking-tight text-white mt-1">Concealed Multi-Point Lock & Rollers</h3>
-            <p className="text-zinc-400 mt-2 text-sm sm:text-base font-light">Stainless steel ball bearings glide silently on heavy-duty tracks, secured with an ergonomic flush architectural latch.</p>
-          </motion.div>
+          </AnimatePresence>
         </div>
 
       </div>

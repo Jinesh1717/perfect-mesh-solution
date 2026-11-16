@@ -1,217 +1,329 @@
 'use client';
 
-import { useState } from 'react';
-import Image from 'next/image';
+import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { ArrowUpRight, CheckCircle2, SlidersHorizontal, Shield, Sparkles } from 'lucide-react';
+import { ChevronLeft, ChevronRight, SlidersHorizontal, ArrowRight, CheckCircle2, ChevronDown } from 'lucide-react';
+import { useSceneStore, ProductSystemType } from '@/lib/useSceneStore';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-const PRODUCTS = [
+interface SystemItem {
+  id: ProductSystemType;
+  title: string;
+  category: string;
+  subtitle: string;
+  heroSpec: string;
+  fromPrice: string;
+  accentColor: string;
+  accentGlow: string;
+  specs: Array<{ label: string; val: string }>;
+  highlights: string[];
+}
+
+const SYSTEMS: SystemItem[] = [
   {
-    id: 'sliding-mesh',
-    category: 'Door Systems',
+    id: 'sliding-door',
     title: 'Sliding Mosquito Mesh Doors',
-    subtitle: 'Heavy-Duty Architectural Balcony & Patio Enclosures',
-    description:
-      'Engineered for wide-span balcony openings and French doors. Features ultra-smooth silent ball-bearing rollers housed within an extruded 6063-T6 architectural aluminium frame with 316-grade high-tensile stainless steel mesh.',
-    image: '/products/sliding_mesh_door.jpg',
+    category: 'Balcony & French Doors',
+    subtitle: 'Heavy-Duty Architectural Enclosures for Wide Openings',
+    heroSpec: '6063-T6 Extruded Frame with 316 Marine Stainless Mesh',
+    fromPrice: 'From ₹ 2,800 base + ₹ 180 / sq.ft',
+    accentColor: '#10b981',
+    accentGlow: 'rgba(16, 185, 129, 0.12)',
     specs: [
-      { label: 'Frame Alloy', val: '6063-T6 Architectural Aluminium' },
-      { label: 'Mesh Material', val: '316 Marine-Grade Stainless Steel' },
-      { label: 'Roller Hardware', val: 'Silent Stainless Ball Bearings' },
-      { label: 'Maximum Span', val: 'Custom built up to 4.2m Height' },
+      { label: 'Alloy Composition', val: '6063-T6 Architectural Grade' },
+      { label: 'Wire Cloth', val: '316 Marine Stainless (0.8mm strand)' },
+      { label: 'Roller Bearing', val: 'Dual Stainless Sealed Ball Bearings' },
+      { label: 'Max Single Span', val: 'Up to 4.2m Height custom build' },
     ],
-    highlights: ['Zero Floor Obstruction Track', 'Resistant to Pets & Severe Weather', 'Concealed Lock System'],
+    highlights: ['Zero Floor Obstruction Track', 'Resistant to Pets & Severe Weather', 'Concealed Multi-Point Lock'],
   },
   {
-    id: 'pleated-mesh',
-    category: 'Retractable Screens',
-    title: 'Pleated Accordion Retractable Systems',
-    subtitle: 'Barrier-Free Low Profile for Modern Terraces',
-    description:
-      'German-engineered zigzag pleated polyester mesh that glides effortlessly and collapses neatly into a slim 35mm side cassette when opened. Designed with a 3mm barrier-free floor guide ideal for high-traffic patio exits.',
-    image: '/products/pleated_mesh_system.jpg',
+    id: 'pleated-system',
+    title: 'Pleated Accordion Retractable Screen',
+    category: 'Terrace & Patio Exits',
+    subtitle: 'Barrier-Free Low Profile Accordion for Modern Architecture',
+    heroSpec: 'High-Memory UV-Stabilized Polyester Zigzag Weave',
+    fromPrice: 'From ₹ 3,200 base + ₹ 220 / sq.ft',
+    accentColor: '#f59e0b',
+    accentGlow: 'rgba(245, 158, 11, 0.12)',
     specs: [
-      { label: 'System Type', val: 'Horizontal Retractable Accordion' },
-      { label: 'Bottom Track', val: '3mm Flat Barrier-Free Guide' },
-      { label: 'Mesh Weave', val: 'UV-Stabilized High-Memory Mesh' },
-      { label: 'Cassette Width', val: 'Slim 35mm Flush Profile' },
+      { label: 'System Guide', val: '3mm Flat Barrier-Free Floor Track' },
+      { label: 'Mesh Fabric', val: 'German High-Memory Pleated Polyester' },
+      { label: 'Side Cassette', val: 'Ultra-Slim 35mm Aluminum Pocket' },
+      { label: 'Wind Resistance', val: 'High-Tension Wire Core Tensioners' },
     ],
-    highlights: ['Wheelchair & Kid Friendly', 'Tension Cord Wind Resistance', 'Compact Lateral Storage'],
+    highlights: ['Wheelchair & Toddler Friendly', 'Collapses Flush Into Side Wall', 'Zero Track Dust Trap'],
   },
   {
     id: 'casement-window',
-    category: 'Window Solutions',
     title: 'Magnetic & Casement Window Screens',
-    subtitle: 'Invisible In-Frame Fit for uPVC, Wood & Aluminium',
-    description:
-      'Seamlessly attaches to existing window frames without compromising window handles or curtains. Features high-energy neodymium magnetic perimeter seals for an airtight barrier that detaches in seconds for cleaning.',
-    image: '/products/casement_window_mesh.jpg',
+    category: 'Window Solutions',
+    subtitle: 'Invisible In-Frame Fit for uPVC, Aluminium & Wood Reveals',
+    heroSpec: 'High-Energy Neodymium Magnetic Perimeter Gasket',
+    fromPrice: 'From ₹ 1,200 base + ₹ 95 / sq.ft',
+    accentColor: '#06b6d4',
+    accentGlow: 'rgba(6, 182, 212, 0.12)',
     specs: [
-      { label: 'Mounting Style', val: 'Flush Magnetic or Hinged Casement' },
-      { label: 'Airflow Index', val: '98% Uninhibited Cross Ventilation' },
+      { label: 'Mounting Style', val: 'Zero-Drill Magnetic or Hinged Sash' },
+      { label: 'Airflow Rating', val: '98.4% Unobstructed Natural Breeze' },
       { label: 'Frame Depths', val: 'Slimline 18mm / 25mm Profiles' },
-      { label: 'Maintenance', val: 'Snap-Off Washable Screen' },
+      { label: 'Maintenance', val: 'Detaches in 3 seconds for tap wash' },
     ],
-    highlights: ['Zero Drilling on uPVC Profiles', 'High-Strength Neodymium Strips', 'Crystal Clear Wire Finish'],
+    highlights: ['Zero Screws on uPVC Windows', 'Airtight Magnetic Perimeter Seal', 'Near-Invisible Optical Clarity'],
   },
   {
-    id: 'aluminium-fabrication',
-    category: 'Aluminium Works',
-    title: 'Architectural Aluminium Fabrication',
-    subtitle: 'Custom Partitions, Balcony Enclosures & Louvers',
-    description:
-      'Precision architectural aluminium fabrication for bespoke architectural partitions, glass balconies, ventilation louvers, and commercial structural facades finished in matte architectural AkzoNobel powder coating.',
-    image: '/products/aluminium_fabrication.jpg',
+    id: 'balcony-partition',
+    title: 'Architectural Aluminium Partitions',
+    category: 'Custom Fabrication',
+    subtitle: 'Custom Balcony Enclosures, Louvers & Structural Dividers',
+    heroSpec: 'AkzoNobel 60-80μm Powder Coating with Reinforced Cleats',
+    fromPrice: 'From ₹ 4,500 base + ₹ 260 / sq.ft',
+    accentColor: '#8b5cf6',
+    accentGlow: 'rgba(139, 92, 246, 0.12)',
     specs: [
-      { label: 'Coating Standard', val: 'AkzoNobel 60-80 Micron Powder Coat' },
-      { label: 'Corner Joints', val: 'Mitered Precision Hydraulic Cleats' },
-      { label: 'Applications', val: 'Balconies, Utility Shafts & Facades' },
-      { label: 'Thermal Rating', val: 'Heavy Acoustic & Weather Sealing' },
+      { label: 'Surface Coating', val: 'AkzoNobel Architectural Powder Finish' },
+      { label: 'Corner Joints', val: 'Hydraulic Mitered Internal Cleats' },
+      { label: 'Glass / Mesh', val: 'Hybrid Toughened Glass + Safety Mesh' },
+      { label: 'Warranty', val: '10-Year Structural Integrity Warranty' },
     ],
-    highlights: ['Bespoke RAL Colors Available', 'Heavy Structural Load Tolerance', 'Rustproof 20-Year Lifespan'],
+    highlights: ['Custom RAL Palette Matching', 'Severe Monsoon Windload Rating', 'Commercial & Villa Grade'],
   },
 ];
 
-const CATEGORIES_FILTER = ['All Systems', 'Door Systems', 'Retractable Screens', 'Window Solutions', 'Aluminium Works'];
-
 export default function Categories() {
-  const [activeFilter, setActiveFilter] = useState('All Systems');
+  const sectionRef = useRef<HTMLElement>(null);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const setStage = useSceneStore((s) => s.setStage);
+  const setActiveSystem = useSceneStore((s) => s.setActiveSystem);
 
-  const filteredProducts =
-    activeFilter === 'All Systems'
-      ? PRODUCTS
-      : PRODUCTS.filter((p) => p.category === activeFilter);
+  const activeItem = SYSTEMS[currentIndex];
+
+  useEffect(() => {
+    if (!sectionRef.current) return;
+
+    const trigger = ScrollTrigger.create({
+      trigger: sectionRef.current,
+      start: 'top center',
+      end: 'bottom center',
+      onEnter: () => {
+        setStage('product');
+        setActiveSystem(SYSTEMS[currentIndex].id);
+      },
+      onEnterBack: () => {
+        setStage('product');
+        setActiveSystem(SYSTEMS[currentIndex].id);
+      },
+    });
+
+    return () => trigger.kill();
+  }, [setStage, setActiveSystem, currentIndex]);
+
+  const handlePrev = () => {
+    const nextIdx = (currentIndex - 1 + SYSTEMS.length) % SYSTEMS.length;
+    setCurrentIndex(nextIdx);
+    setActiveSystem(SYSTEMS[nextIdx].id);
+  };
+
+  const handleNext = () => {
+    const nextIdx = (currentIndex + 1) % SYSTEMS.length;
+    setCurrentIndex(nextIdx);
+    setActiveSystem(SYSTEMS[nextIdx].id);
+  };
+
+  const handleSelect = (idx: number) => {
+    setCurrentIndex(idx);
+    setActiveSystem(SYSTEMS[idx].id);
+  };
 
   return (
-    <section className="py-28 md:py-36 bg-[#080808] relative overflow-hidden w-full max-w-full" id="products">
-      {/* Subtle ambient lighting constrained to viewport */}
-      <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] max-w-full h-[350px] bg-white/[0.02] blur-[150px] rounded-full pointer-events-none overflow-hidden" />
+    <section
+      ref={sectionRef}
+      className="py-20 md:py-24 bg-[#070809] relative overflow-hidden w-full border-t border-white/[0.08]"
+      id="products"
+    >
+      {/* Dynamic Background Accent Glow (transitions per product) */}
+      <div
+        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[650px] max-w-full h-[350px] blur-[150px] rounded-full pointer-events-none transition-colors duration-700 overflow-hidden"
+        style={{ backgroundColor: activeItem.accentGlow }}
+      />
 
       <div className="max-w-7xl mx-auto px-6 relative z-10 w-full">
         {/* Section Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between mb-16 gap-8">
-          <div>
-            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/[0.04] border border-white/10 text-xs font-mono uppercase tracking-[0.2em] text-zinc-400 mb-4">
-              <SlidersHorizontal size={12} className="text-zinc-300" />
-              <span>Architectural Systems</span>
-            </div>
-            <h2 className="text-3xl sm:text-5xl md:text-6xl font-black text-white tracking-tight leading-[1.08]">
-              Engineered For Modern Living.
-              <br />
-              <span className="text-zinc-500 font-light">Crafted Without Compromise.</span>
-            </h2>
+        <div className="text-center mb-10 md:mb-14">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/10 text-xs font-mono uppercase tracking-[0.2em] text-zinc-300 mb-3">
+            <SlidersHorizontal size={13} className="text-zinc-300" />
+            <span>Focal Architectural Catalog</span>
           </div>
-
-          <p className="text-zinc-400 max-w-md text-sm sm:text-base leading-relaxed font-light">
-            Every mosquito mesh system and aluminium frame is custom-fabricated to exact site dimensions using aerospace-grade extrusions and marine-grade mesh weaves.
+          <h2 className="text-3xl sm:text-5xl md:text-6xl font-black text-white tracking-tight leading-[1.08]">
+            Engineered For Modern Living.
+          </h2>
+          <p className="text-zinc-300 max-w-xl mx-auto text-sm sm:text-base mt-3 font-light">
+            Select a system below to preview architectural specs, configurations, and indicative pricing.
           </p>
-        </div>
 
-        {/* Category Filter Chips */}
-        <div className="flex items-center gap-2 overflow-x-auto pb-4 mb-12 no-scrollbar max-w-full">
-          {CATEGORIES_FILTER.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setActiveFilter(cat)}
-              className={`px-5 py-2.5 rounded-full text-xs font-semibold tracking-wider uppercase transition-all whitespace-nowrap cursor-pointer shrink-0 ${
-                activeFilter === cat
-                  ? 'bg-white text-black shadow-[0_0_20px_rgba(255,255,255,0.2)]'
-                  : 'bg-white/[0.04] border border-white/10 text-zinc-400 hover:text-white hover:bg-white/[0.08]'
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
-        </div>
-
-        {/* Editorial Product Cards Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 w-full">
-          <AnimatePresence mode="popLayout">
-            {filteredProducts.map((product, idx) => (
-              <motion.div
-                key={product.id}
-                layout
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                transition={{ duration: 0.5, delay: idx * 0.1 }}
-                className="group relative rounded-3xl bg-[#0e1013] border border-white/[0.08] hover:border-white/20 transition-all duration-500 overflow-hidden flex flex-col shadow-2xl w-full"
+          {/* System Category Chips Switcher */}
+          <div className="flex items-center justify-center gap-2 mt-8 overflow-x-auto pb-2 no-scrollbar max-w-full">
+            {SYSTEMS.map((item, idx) => (
+              <button
+                key={item.id}
+                onClick={() => handleSelect(idx)}
+                className={`px-4 sm:px-5 py-2.5 rounded-full text-xs font-semibold tracking-wider uppercase transition-all whitespace-nowrap cursor-pointer shrink-0 ${
+                  currentIndex === idx
+                    ? 'bg-white text-black shadow-[0_0_20px_rgba(255,255,255,0.25)] scale-105'
+                    : 'bg-white/[0.04] border border-white/10 text-zinc-300 hover:text-white hover:bg-white/[0.08]'
+                }`}
               >
-                {/* Product Architectural Image Container */}
-                <div className="relative w-full h-72 sm:h-80 md:h-96 overflow-hidden bg-black/40">
-                  <Image
-                    src={product.image}
-                    alt={product.title}
-                    fill
-                    sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                    priority={idx === 0}
-                    className="object-cover group-hover:scale-105 transition-transform duration-700 ease-out brightness-[0.9] group-hover:brightness-100"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-[#0e1013] via-transparent to-black/30" />
-                  
-                  {/* Category Pill Tag */}
-                  <div className="absolute top-5 left-5 z-10 px-3.5 py-1.5 rounded-full bg-black/70 backdrop-blur-md border border-white/15 text-[11px] font-mono uppercase tracking-widest text-white">
-                    {product.category}
-                  </div>
-                </div>
-
-                {/* Content Panel */}
-                <div className="p-6 sm:p-8 flex-1 flex flex-col justify-between">
-                  <div>
-                    <h3 className="text-xl sm:text-2xl font-bold text-white tracking-tight group-hover:text-zinc-100 transition-colors">
-                      {product.title}
-                    </h3>
-                    <p className="text-xs font-mono uppercase tracking-wider text-zinc-400 mt-1 mb-4">
-                      {product.subtitle}
-                    </p>
-                    <p className="text-zinc-400 text-sm leading-relaxed font-light mb-6">
-                      {product.description}
-                    </p>
-
-                    {/* Technical Specifications Grid */}
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 py-4 border-y border-white/[0.06] mb-6">
-                      {product.specs.map((spec, sIdx) => (
-                        <div key={sIdx} className="flex flex-col">
-                          <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-500">
-                            {spec.label}
-                          </span>
-                          <span className="text-xs font-medium text-zinc-300 mt-0.5">
-                            {spec.val}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Architecture Feature Bullet Points */}
-                    <div className="flex flex-wrap gap-2 mb-8">
-                      {product.highlights.map((h, hIdx) => (
-                        <span
-                          key={hIdx}
-                          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/[0.03] border border-white/10 text-xs text-zinc-300"
-                        >
-                          <CheckCircle2 size={12} className="text-zinc-400" />
-                          <span>{h}</span>
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Booking CTA Bar */}
-                  <div className="pt-4 border-t border-white/[0.06] flex items-center justify-between">
-                    <span className="text-xs font-mono uppercase tracking-wider text-zinc-500">
-                      Bespoke On-Site Fabrication
-                    </span>
-                    <a
-                      href="#contact"
-                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-white/[0.05] hover:bg-white text-zinc-300 hover:text-black font-semibold text-xs uppercase tracking-wider transition-all duration-300 border border-white/10 hover:border-white shadow-lg"
-                    >
-                      <span>Get Site Estimate</span>
-                      <ArrowUpRight size={14} />
-                    </a>
-                  </div>
-                </div>
-              </motion.div>
+                {item.title.split(' ')[0]} {item.title.split(' ')[1]}
+              </button>
             ))}
+          </div>
+        </div>
+
+        {/* Central Focal Showcase Card (Fizzi Style) */}
+        <div className="max-w-4xl mx-auto">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={activeItem.id}
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -15 }}
+              transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
+              className="p-8 sm:p-12 rounded-3xl bg-[#0e1013]/90 border border-white/15 backdrop-blur-2xl shadow-2xl relative"
+            >
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-white/[0.08] gap-4">
+                <div>
+                  <span className="text-xs font-mono uppercase tracking-widest text-zinc-400">
+                    {activeItem.category}
+                  </span>
+                  <h3 className="text-2xl sm:text-4xl font-bold text-white tracking-tight mt-1">
+                    {activeItem.title}
+                  </h3>
+                  <p className="text-xs sm:text-sm text-zinc-300 mt-1 font-light">
+                    {activeItem.subtitle}
+                  </p>
+                </div>
+
+                <div className="text-left sm:text-right shrink-0">
+                  <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-400 block">
+                    Ballpark Pricing
+                  </span>
+                  <span className="text-lg sm:text-xl font-bold font-mono text-emerald-400 block mt-0.5">
+                    {activeItem.fromPrice}
+                  </span>
+                </div>
+              </div>
+
+              {/* Focal Key Metric Highlight */}
+              <div className="py-6 border-b border-white/[0.08]">
+                <div className="flex items-center gap-3 p-4 rounded-2xl bg-white/[0.03] border border-white/10">
+                  <div
+                    className="w-3 h-3 rounded-full shrink-0"
+                    style={{ backgroundColor: activeItem.accentColor }}
+                  />
+                  <div>
+                    <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-400 block">
+                      Core Architectural Engineering Spec
+                    </span>
+                    <span className="text-sm sm:text-base font-semibold text-white mt-0.5 block">
+                      {activeItem.heroSpec}
+                    </span>
+                  </div>
+                </div>
+
+                {/* Architectural Highlights */}
+                <div className="flex flex-wrap gap-2.5 mt-5">
+                  {activeItem.highlights.map((h, hIdx) => (
+                    <span
+                      key={hIdx}
+                      className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-white/[0.04] border border-white/10 text-xs text-zinc-200"
+                    >
+                      <CheckCircle2 size={13} className="text-emerald-400" />
+                      <span>{h}</span>
+                    </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Technical Specifications Accordion Drawer */}
+              <div className="pt-4">
+                <button
+                  onClick={() => setDrawerOpen(!drawerOpen)}
+                  className="w-full flex items-center justify-between py-2 text-xs font-mono uppercase tracking-wider text-zinc-300 hover:text-white transition-colors cursor-pointer"
+                >
+                  <span>{drawerOpen ? 'Hide Engineering Specs' : 'View Detailed Technical Specifications'}</span>
+                  <ChevronDown
+                    size={16}
+                    className={`transition-transform duration-300 ${drawerOpen ? 'rotate-180' : ''}`}
+                  />
+                </button>
+
+                <AnimatePresence>
+                  {drawerOpen && (
+                    <motion.div
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ opacity: 1, height: 'auto' }}
+                      exit={{ opacity: 0, height: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="overflow-hidden pt-4"
+                    >
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 rounded-2xl bg-black/40 border border-white/10 text-xs">
+                        {activeItem.specs.map((spec, sIdx) => (
+                          <div key={sIdx} className="flex flex-col">
+                            <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-400">
+                              {spec.label}
+                            </span>
+                            <span className="text-xs font-medium text-zinc-200 mt-1">
+                              {spec.val}
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+
+              {/* Action Buttons & Prev/Next Carousel Nav */}
+              <div className="mt-8 pt-6 border-t border-white/[0.08] flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handlePrev}
+                    className="p-3 rounded-full bg-white/5 border border-white/15 text-white hover:bg-white/15 transition-all cursor-pointer shadow-lg"
+                    aria-label="Previous system"
+                  >
+                    <ChevronLeft size={18} />
+                  </button>
+                  <span className="text-xs font-mono text-zinc-400 px-3">
+                    0{currentIndex + 1} / 0{SYSTEMS.length}
+                  </span>
+                  <button
+                    onClick={handleNext}
+                    className="p-3 rounded-full bg-white/5 border border-white/15 text-white hover:bg-white/15 transition-all cursor-pointer shadow-lg"
+                    aria-label="Next system"
+                  >
+                    <ChevronRight size={18} />
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-3 w-full sm:w-auto">
+                  <a
+                    href="#calculator"
+                    className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-white text-black font-semibold text-xs uppercase tracking-wider hover:bg-zinc-200 transition-all shadow-xl"
+                  >
+                    <span>Estimate Price</span>
+                    <ArrowRight size={14} />
+                  </a>
+                  <a
+                    href="#contact"
+                    className="flex-1 sm:flex-initial inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-white/[0.05] border border-white/15 text-white font-semibold text-xs uppercase tracking-wider hover:bg-white/10 transition-all"
+                  >
+                    Book Visit
+                  </a>
+                </div>
+              </div>
+            </motion.div>
           </AnimatePresence>
         </div>
       </div>
