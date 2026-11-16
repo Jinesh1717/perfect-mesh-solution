@@ -84,6 +84,7 @@ export default function Showcase() {
                 src="/after.png"
                 alt="After: Perfect Mesh Invisible Protection Installed"
                 fill
+                sizes="(max-width: 768px) 100vw, 896px"
                 className="object-cover"
                 priority
               />
@@ -102,6 +103,7 @@ export default function Showcase() {
                   src="/before.png"
                   alt="Before: Vulnerable open doorway without mesh"
                   fill
+                  sizes="(max-width: 768px) 100vw, 896px"
                   className="object-cover object-left"
                   priority
                 />

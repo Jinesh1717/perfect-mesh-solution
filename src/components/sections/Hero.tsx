@@ -1,21 +1,75 @@
 'use client';
 
+import { useState } from 'react';
 import { motion } from 'framer-motion';
 import dynamic from 'next/dynamic';
-import { ArrowRight, ShieldCheck, Compass, Sparkles } from 'lucide-react';
+import { ArrowRight, ShieldCheck, Compass, Sparkles, Sliders, MessageSquare } from 'lucide-react';
 
 // Dynamically import 3D scene to prevent SSR WebGL mismatch
 const HeroScene = dynamic(() => import('../3d/HeroScene'), { ssr: false });
 
+const FINISHES = [
+  { name: 'Charcoal Noir', color: '#1a1c20', ring: 'border-zinc-500' },
+  { name: 'Champagne Bronze', color: '#3f3529', ring: 'border-amber-600' },
+  { name: 'Space Titanium', color: '#4a505b', ring: 'border-zinc-400' },
+  { name: 'Polar White', color: '#dce0e8', ring: 'border-white' },
+];
+
 export default function Hero() {
+  const [selectedFinish, setSelectedFinish] = useState(FINISHES[0]);
+  const [isSashOpen, setIsSashOpen] = useState(false);
+
   return (
     <section className="relative min-h-[100dvh] w-full flex items-center justify-center overflow-hidden bg-[#070809] pt-24 pb-16">
-      {/* 3D Interactive Window Model Canvas */}
-      <HeroScene />
+      {/* 3D Interactive Window Model Canvas with Dynamic Finish & Sash Control */}
+      <HeroScene frameColor={selectedFinish.color} isSashOpenManual={isSashOpen} />
 
       {/* Atmospheric Vignette & Contrast Gradient */}
       <div className="absolute inset-0 bg-radial-gradient from-transparent via-[#070809]/40 to-[#070809] z-0 pointer-events-none" />
       <div className="absolute inset-x-0 bottom-0 h-40 bg-gradient-to-t from-[#070809] to-transparent z-0 pointer-events-none" />
+
+      {/* Floating 3D Interactive Controls: Finish Selector & Sash Glide Toggle */}
+      <motion.div
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.8, delay: 0.5 }}
+        className="absolute top-28 left-6 sm:left-10 z-20 hidden md:flex flex-col gap-3 pointer-events-auto"
+      >
+        <div className="p-3.5 rounded-2xl bg-black/60 border border-white/10 backdrop-blur-xl shadow-2xl flex flex-col gap-2.5">
+          <span className="text-[10px] font-mono uppercase tracking-widest text-zinc-400 flex items-center gap-1.5">
+            <Sliders size={11} className="text-zinc-300" />
+            <span>Alloy Finish</span>
+          </span>
+          <div className="flex items-center gap-2">
+            {FINISHES.map((finish) => (
+              <button
+                key={finish.name}
+                onClick={() => setSelectedFinish(finish)}
+                className={`w-6 h-6 rounded-full border transition-all cursor-pointer ${
+                  selectedFinish.name === finish.name
+                    ? `${finish.ring} scale-125 shadow-[0_0_12px_rgba(255,255,255,0.4)]`
+                    : 'border-white/20 opacity-70 hover:opacity-100 hover:scale-110'
+                }`}
+                style={{ backgroundColor: finish.color }}
+                title={finish.name}
+                aria-label={`Select ${finish.name} frame finish`}
+              />
+            ))}
+          </div>
+          <span className="text-[9px] font-mono text-zinc-400 truncate max-w-[120px]">
+            {selectedFinish.name}
+          </span>
+        </div>
+
+        {/* Sash Slide Toggle */}
+        <button
+          onClick={() => setIsSashOpen(!isSashOpen)}
+          className="px-3.5 py-2 rounded-xl bg-black/60 border border-white/10 backdrop-blur-xl text-[11px] font-mono text-zinc-300 hover:text-white hover:border-white/25 transition-all text-left flex items-center justify-between cursor-pointer shadow-xl"
+        >
+          <span>Sash: {isSashOpen ? 'Open' : 'Closed'}</span>
+          <span className={`w-2 h-2 rounded-full ml-2 ${isSashOpen ? 'bg-emerald-400' : 'bg-zinc-600'}`} />
+        </button>
+      </motion.div>
 
       {/* Overlay Content Container */}
       <div className="relative z-10 w-full max-w-7xl mx-auto px-6 flex flex-col items-center justify-center text-center pointer-events-none mt-10 md:mt-4">
@@ -67,16 +121,25 @@ export default function Hero() {
         >
           <a
             href="#story"
-            className="w-full sm:w-auto px-8 py-4 rounded-full bg-white text-black font-semibold text-xs sm:text-sm uppercase tracking-wider hover:bg-zinc-200 transition-all duration-300 hover:scale-[1.02] shadow-[0_0_30px_rgba(255,255,255,0.2)] flex items-center justify-center gap-2 group"
+            className="w-full sm:w-auto px-8 py-4 rounded-full bg-white text-black font-semibold text-xs sm:text-sm uppercase tracking-wider hover:bg-zinc-200 transition-all duration-300 hover:scale-[1.02] shadow-[0_0_30px_rgba(255,255,255,0.2)] flex items-center justify-center gap-2 group cursor-pointer"
           >
             <span>Explore Defense In Action</span>
             <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform" />
           </a>
           <a
-            href="#contact"
-            className="w-full sm:w-auto px-8 py-4 rounded-full bg-white/[0.05] border border-white/15 text-white font-semibold text-xs sm:text-sm uppercase tracking-wider hover:bg-white/10 hover:border-white/30 transition-all duration-300 hover:scale-[1.02] backdrop-blur-md"
+            href="https://wa.me/917012715025?text=Hello%20Perfect%20Mesh,%20I%20would%20like%20to%20book%20a%20free%20in-home%20laser%20measurement%20survey."
+            target="_blank"
+            rel="noopener noreferrer"
+            className="w-full sm:w-auto px-7 py-4 rounded-full bg-[#128C7E]/20 border border-[#25D366]/40 text-[#25D366] font-semibold text-xs sm:text-sm uppercase tracking-wider hover:bg-[#128C7E]/30 transition-all duration-300 hover:scale-[1.02] backdrop-blur-md flex items-center justify-center gap-2 cursor-pointer shadow-lg"
           >
-            Book Free Laser Measurement
+            <MessageSquare size={16} />
+            <span>WhatsApp Booking</span>
+          </a>
+          <a
+            href="#contact"
+            className="w-full sm:w-auto px-7 py-4 rounded-full bg-white/[0.05] border border-white/15 text-white font-semibold text-xs sm:text-sm uppercase tracking-wider hover:bg-white/10 hover:border-white/30 transition-all duration-300 hover:scale-[1.02] backdrop-blur-md cursor-pointer"
+          >
+            Free Site Visit
           </a>
         </motion.div>
 

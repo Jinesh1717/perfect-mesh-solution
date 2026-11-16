@@ -204,6 +204,7 @@ export default function MosquitoWindowScroll() {
             src="/house.jpg"
             alt="Modern Architectural House Facade"
             fill
+            sizes="100vw"
             className="object-cover"
             priority
           />

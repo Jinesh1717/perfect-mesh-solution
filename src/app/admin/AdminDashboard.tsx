@@ -23,10 +23,12 @@ export default function AdminDashboard({ leads }: { leads: LeadItem[] }) {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'all' | 'new' | 'scheduled'>('all');
 
-  // Verify PIN (default PIN: mesh2026)
+  // Verify PIN (default PIN: mesh2026 or configured NEXT_PUBLIC_ADMIN_PIN)
+  const validPin = process.env.NEXT_PUBLIC_ADMIN_PIN || 'mesh2026';
+
   const handlePinSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (pinInput.trim() === 'mesh2026') {
+    if (pinInput.trim() === validPin) {
       setIsAuthenticated(true);
       sessionStorage.setItem('admin_auth', 'true');
       setPinError(false);

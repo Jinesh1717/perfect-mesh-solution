@@ -5,7 +5,15 @@ import { Canvas } from '@react-three/fiber';
 import { Environment, Float, ContactShadows } from '@react-three/drei';
 import WindowModel from './WindowModel';
 
-export default function HeroScene() {
+interface HeroSceneProps {
+  frameColor?: string;
+  isSashOpenManual?: boolean;
+}
+
+export default function HeroScene({
+  frameColor = '#1a1c20',
+  isSashOpenManual = false,
+}: HeroSceneProps) {
   return (
     <div className="absolute inset-0 z-0 select-none pointer-events-auto">
       <Canvas
@@ -35,7 +43,7 @@ export default function HeroScene() {
 
           {/* Gentle, controlled levitation */}
           <Float speed={1.2} rotationIntensity={0.12} floatIntensity={0.15} floatingRange={[-0.04, 0.04]}>
-            <WindowModel />
+            <WindowModel frameColor={frameColor} isSashOpenManual={isSashOpenManual} />
           </Float>
 
           {/* Architectural contact ground shadow */}

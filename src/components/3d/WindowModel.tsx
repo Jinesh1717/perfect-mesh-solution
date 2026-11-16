@@ -5,11 +5,21 @@ import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { useScroll } from 'framer-motion';
 
-export default function WindowModel() {
+interface WindowModelProps {
+  frameColor?: string;
+  isSashOpenManual?: boolean;
+}
+
+export default function WindowModel({
+  frameColor = '#1a1c20',
+  isSashOpenManual = false,
+}: WindowModelProps) {
   const groupRef = useRef<THREE.Group>(null);
   const meshPanelRef = useRef<THREE.Mesh>(null);
   const slidingSashRef = useRef<THREE.Group>(null);
   const elapsedRef = useRef<number>(0);
+  const targetColor = useMemo(() => new THREE.Color(frameColor), [frameColor]);
+  const currentColor = useRef<THREE.Color>(new THREE.Color(frameColor));
 
   const { scrollYProgress } = useScroll();
 
@@ -55,10 +65,14 @@ export default function WindowModel() {
     groupRef.current.rotation.y = THREE.MathUtils.damp(groupRef.current.rotation.y, targetRotY, 4.5, delta);
     groupRef.current.position.z = THREE.MathUtils.damp(groupRef.current.position.z, targetPosZ, 5.0, delta);
 
-    // Subtle sliding motion of the mesh sash on scroll
+    // Color transition lerp
+    currentColor.current.lerp(targetColor, Math.min(1, delta * 6));
+
+    // Dynamic sliding motion of the mesh sash (combines scroll progress and manual toggle)
     if (slidingSashRef.current) {
-      const slideOffset = Math.sin(heroProgress * Math.PI) * 0.28;
-      const targetSashX = 0.72 - slideOffset;
+      const scrollOffset = Math.sin(heroProgress * Math.PI) * 0.28;
+      const manualOffset = isSashOpenManual ? 0.75 : 0;
+      const targetSashX = 0.72 - scrollOffset - manualOffset;
       slidingSashRef.current.position.x = THREE.MathUtils.damp(slidingSashRef.current.position.x, targetSashX, 6.0, delta);
     }
   });
@@ -72,28 +86,28 @@ export default function WindowModel() {
         {/* Top Header Rail */}
         <mesh position={[0, 1.95, 0]}>
           <boxGeometry args={[3.2, 0.18, 0.22]} />
-          <meshStandardMaterial color="#1a1c20" roughness={0.28} metalness={0.9} />
+          <meshStandardMaterial color={frameColor} roughness={0.28} metalness={0.9} />
         </mesh>
         {/* Bottom Sill / Double Track Rail */}
         <mesh position={[0, -1.95, 0]}>
           <boxGeometry args={[3.2, 0.22, 0.26]} />
-          <meshStandardMaterial color="#141518" roughness={0.32} metalness={0.92} />
+          <meshStandardMaterial color={frameColor} roughness={0.32} metalness={0.92} />
         </mesh>
         {/* Left Jamb */}
         <mesh position={[-1.52, 0, 0]}>
           <boxGeometry args={[0.16, 4.08, 0.22]} />
-          <meshStandardMaterial color="#1a1c20" roughness={0.28} metalness={0.9} />
+          <meshStandardMaterial color={frameColor} roughness={0.28} metalness={0.9} />
         </mesh>
         {/* Right Jamb */}
         <mesh position={[1.52, 0, 0]}>
           <boxGeometry args={[0.16, 4.08, 0.22]} />
-          <meshStandardMaterial color="#1a1c20" roughness={0.28} metalness={0.9} />
+          <meshStandardMaterial color={frameColor} roughness={0.28} metalness={0.9} />
         </mesh>
 
         {/* Center Vertical Interlock Mullion */}
         <mesh position={[0, 0, 0]}>
           <boxGeometry args={[0.08, 3.75, 0.16]} />
-          <meshStandardMaterial color="#26292e" roughness={0.24} metalness={0.92} />
+          <meshStandardMaterial color={frameColor} roughness={0.24} metalness={0.92} />
         </mesh>
       </group>
 
@@ -104,19 +118,19 @@ export default function WindowModel() {
         {/* Inner Sash Frame */}
         <mesh position={[0, 1.8, 0]}>
           <boxGeometry args={[1.42, 0.08, 0.08]} />
-          <meshStandardMaterial color="#22252a" roughness={0.32} metalness={0.85} />
+          <meshStandardMaterial color={frameColor} roughness={0.32} metalness={0.85} />
         </mesh>
         <mesh position={[0, -1.8, 0]}>
           <boxGeometry args={[1.42, 0.08, 0.08]} />
-          <meshStandardMaterial color="#22252a" roughness={0.32} metalness={0.85} />
+          <meshStandardMaterial color={frameColor} roughness={0.32} metalness={0.85} />
         </mesh>
         <mesh position={[-0.67, 0, 0]}>
           <boxGeometry args={[0.08, 3.68, 0.08]} />
-          <meshStandardMaterial color="#22252a" roughness={0.32} metalness={0.85} />
+          <meshStandardMaterial color={frameColor} roughness={0.32} metalness={0.85} />
         </mesh>
         <mesh position={[0.67, 0, 0]}>
           <boxGeometry args={[0.08, 3.68, 0.08]} />
-          <meshStandardMaterial color="#22252a" roughness={0.32} metalness={0.85} />
+          <meshStandardMaterial color={frameColor} roughness={0.32} metalness={0.85} />
         </mesh>
 
         {/* Glass Pane */}
@@ -142,19 +156,19 @@ export default function WindowModel() {
         {/* Precision Aluminium Sash Frame with Beveled Edges */}
         <mesh position={[0, 1.8, 0]}>
           <boxGeometry args={[1.42, 0.09, 0.09]} />
-          <meshStandardMaterial color="#2c3036" roughness={0.22} metalness={0.94} />
+          <meshStandardMaterial color={frameColor} roughness={0.22} metalness={0.94} />
         </mesh>
         <mesh position={[0, -1.8, 0]}>
           <boxGeometry args={[1.42, 0.09, 0.09]} />
-          <meshStandardMaterial color="#2c3036" roughness={0.22} metalness={0.94} />
+          <meshStandardMaterial color={frameColor} roughness={0.22} metalness={0.94} />
         </mesh>
         <mesh position={[-0.67, 0, 0]}>
           <boxGeometry args={[0.09, 3.69, 0.09]} />
-          <meshStandardMaterial color="#2c3036" roughness={0.22} metalness={0.94} />
+          <meshStandardMaterial color={frameColor} roughness={0.22} metalness={0.94} />
         </mesh>
         <mesh position={[0.67, 0, 0]}>
           <boxGeometry args={[0.09, 3.69, 0.09]} />
-          <meshStandardMaterial color="#2c3036" roughness={0.22} metalness={0.94} />
+          <meshStandardMaterial color={frameColor} roughness={0.22} metalness={0.94} />
         </mesh>
 
         {/* Flush Architectural Pull Handle */}
