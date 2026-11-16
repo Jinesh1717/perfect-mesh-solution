@@ -1,13 +1,28 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-
 import Image from 'next/image';
+import { Eye, Star, MapPin } from 'lucide-react';
 
 const testimonials = [
-  { name: "Sarah Jenkins", role: "Homeowner", text: "The invisible mesh completely transformed our living room. We get fresh air all day without a single mosquito." },
-  { name: "Michael T.", role: "Architect", text: "I specify Perfect Mesh structural aluminium for all my luxury villa projects. The finish is unmatched." },
-  { name: "Priya R.", role: "Interior Designer", text: "Sleek, minimal, and highly functional. The sliding mechanism is butter smooth." }
+  {
+    name: 'Vikram & Radhika Seth',
+    role: 'Luxury Villa Owners',
+    location: 'Palm Meadows, Bengaluru',
+    text: 'The sliding mesh doors completely opened up our courtyard. We enjoy the monsoon evening breeze without a single mosquito. The aluminium fabrication feels solid and seamlessly integrates with our minimalist decor.',
+  },
+  {
+    name: 'Ar. Michael Thomas',
+    role: 'Principal Architect, Studio Forma',
+    location: 'Indiranagar, Bengaluru',
+    text: 'I specify Perfect Mesh structural aluminium systems for all high-end residential commissions. Their tolerance control, mitered corner finishes, and invisible mesh tensioning are unmatched in the region.',
+  },
+  {
+    name: 'Priya Ramachandran',
+    role: 'Interior Architecture Consultant',
+    location: 'Koramangala, Bengaluru',
+    text: 'The pleated retractable screens for large French balconies solved a persistent client dilemma. Whisper-quiet glide, barrier-free floor track, and zero visual clutter.',
+  },
 ];
 
 export default function Showcase() {
@@ -15,8 +30,12 @@ export default function Showcase() {
   const [sliderPosition, setSliderPosition] = useState(50);
   const isDragging = useRef(false);
 
-  const handlePointerDown = () => { isDragging.current = true; };
-  const handlePointerUp = () => { isDragging.current = false; };
+  const handlePointerDown = () => {
+    isDragging.current = true;
+  };
+  const handlePointerUp = () => {
+    isDragging.current = false;
+  };
   const handlePointerMove = (e: React.PointerEvent | PointerEvent) => {
     if (!isDragging.current || !containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
@@ -34,69 +53,109 @@ export default function Showcase() {
   }, []);
 
   return (
-    <section className="py-32 bg-background relative overflow-hidden" id="showcase">
-      <div className="max-w-7xl mx-auto px-6">
+    <section className="py-28 md:py-36 bg-[#080808] relative overflow-hidden border-t border-white/[0.06] w-full" id="showcase">
+      <div className="max-w-7xl mx-auto px-6 w-full">
+        {/* Header */}
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-bold text-white tracking-tight mb-4">The Perfect Transformation</h2>
-          <p className="text-gray-400 text-lg">Swipe to see the invisible difference.</p>
-        </div>
-        
-        {/* Before / After Slider */}
-        <div 
-           ref={containerRef}
-           className="relative w-full max-w-5xl h-[400px] md:h-[600px] mx-auto rounded-3xl overflow-hidden cursor-ew-resize select-none glass-panel shadow-2xl"
-           onPointerDown={handlePointerDown}
-           style={{ touchAction: 'none' }}
-        >
-          {/* AFTER Image (Bottom Layer) */}
-          <div className="absolute inset-0 bg-[#1a1a1a] flex flex-col items-center justify-center">
-             <Image src="/after.png" alt="After installing mesh" fill className="object-cover" />
-             <div className="absolute inset-0 bg-gradient-to-tr from-[#111]/40 to-transparent" />
-             <p className="text-white text-3xl font-black z-10 opacity-70 tracking-widest pl-[50%] drop-shadow-xl saturate-0">AFTER</p>
+          <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/[0.04] border border-white/10 text-xs font-mono uppercase tracking-[0.2em] text-zinc-400 mb-4">
+            <Eye size={12} className="text-zinc-300" />
+            <span>Interactive Comparison</span>
           </div>
-
-          {/* BEFORE Image (Top Layer, clipped) */}
-          <div 
-            className="absolute inset-0 bg-[#0d0d0d] flex items-center justify-center border-r-[2px] border-white/50"
-            style={{ clipPath: `inset(0 ${100 - sliderPosition}% 0 0)` }}
-          >
-             <Image src="/before.png" alt="Before installing mesh" fill className="object-cover" />
-             <div className="absolute inset-0 bg-gradient-to-bl from-[#222]/30 to-[#050505]/40" />
-             <p className="text-white text-3xl font-black z-10 opacity-70 tracking-widest pr-[50%] drop-shadow-xl saturate-0">BEFORE</p>
-          </div>
-
-          {/* Slider Handle */}
-          <div 
-             className="absolute top-0 bottom-0 w-0.5 bg-white z-20 flex items-center justify-center -ml-0.25 shadow-[0_0_10px_rgba(255,255,255,0.5)]"
-             style={{ left: `${sliderPosition}%` }}
-          >
-             <div className="w-10 h-10 md:w-14 md:h-14 bg-white/10 backdrop-blur-md border border-white/40 rounded-full flex items-center justify-center shadow-2xl text-white">
-               <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18 6-6-6-6"/><path d="m9 18-6-6 6-6"/></svg>
-             </div>
-          </div>
+          <h2 className="text-3xl sm:text-5xl md:text-6xl font-black text-white tracking-tight leading-[1.08]">
+            The Invisible Difference.
+            <br />
+            <span className="text-zinc-500 font-light">Drag to Reveal The Transformation.</span>
+          </h2>
+          <p className="text-zinc-400 text-sm sm:text-base mt-4 max-w-xl mx-auto font-light">
+            Compare open exterior vulnerability with our installed high-tensile architectural micro-mesh system.
+          </p>
         </div>
 
-        {/* Testimonials */}
-        <div className="mt-32">
-          <h3 className="text-2xl md:text-3xl font-bold text-center mb-12">What Our Clients Say</h3>
-          <div className="grid md:grid-cols-3 gap-6">
-            {testimonials.map((t, idx) => (
-              <div key={idx} className="glass-panel p-8 rounded-2xl flex flex-col justify-between">
-                <div>
-                  <div className="flex gap-1 mb-4 text-accent">
-                    {[1,2,3,4,5].map(star => <svg key={star} xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>)}
-                  </div>
-                  <p className="text-gray-300 italic mb-6">"{t.text}"</p>
+        {/* Before / After Interactive Slider */}
+        <div className="max-w-4xl mx-auto mb-24">
+          <div
+            ref={containerRef}
+            onPointerDown={handlePointerDown}
+            className="relative h-[340px] sm:h-[450px] md:h-[520px] rounded-3xl overflow-hidden border border-white/15 select-none touch-none shadow-2xl cursor-ew-resize bg-black"
+          >
+            {/* After Image (Full Background) */}
+            <div className="absolute inset-0">
+              <Image
+                src="/after.png"
+                alt="After: Perfect Mesh Invisible Protection Installed"
+                fill
+                className="object-cover"
+                priority
+              />
+              <div className="absolute bottom-6 right-6 px-4 py-1.5 rounded-full bg-black/70 backdrop-blur-md border border-white/15 text-xs font-mono uppercase tracking-widest text-emerald-400 pointer-events-none">
+                After: Perfect Mesh Installed
+              </div>
+            </div>
+
+            {/* Before Image (Clipped Left Side) */}
+            <div
+              className="absolute inset-y-0 left-0 overflow-hidden border-r-2 border-white shadow-[0_0_20px_rgba(255,255,255,0.4)]"
+              style={{ width: `${sliderPosition}%` }}
+            >
+              <div className="relative w-full h-full">
+                <Image
+                  src="/before.png"
+                  alt="Before: Vulnerable open doorway without mesh"
+                  fill
+                  className="object-cover object-left"
+                  priority
+                />
+              </div>
+              <div className="absolute bottom-6 left-6 px-4 py-1.5 rounded-full bg-black/70 backdrop-blur-md border border-white/15 text-xs font-mono uppercase tracking-widest text-zinc-300 pointer-events-none">
+                Before: Vulnerable Opening
+              </div>
+            </div>
+
+            {/* Center Slider Grab Bar Handle */}
+            <div
+              className="absolute inset-y-0 -translate-x-1/2 flex items-center justify-center pointer-events-none z-20"
+              style={{ left: `${sliderPosition}%` }}
+            >
+              <div className="w-10 h-10 rounded-full bg-white text-black shadow-[0_0_25px_rgba(0,0,0,0.8)] flex items-center justify-center text-xs font-bold border border-white/80">
+                ⟷
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-center gap-2 mt-4 text-xs font-mono uppercase tracking-widest text-zinc-500">
+            <span>Drag slider horizontally to inspect optical clarity</span>
+          </div>
+        </div>
+
+        {/* Verified Architectural Client Testimonials */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {testimonials.map((t, idx) => (
+            <div
+              key={idx}
+              className="p-8 rounded-3xl bg-[#0e1013] border border-white/[0.08] hover:border-white/20 transition-all flex flex-col justify-between shadow-xl"
+            >
+              <div>
+                <div className="flex items-center gap-1 text-amber-400 mb-6">
+                  {[...Array(5)].map((_, i) => (
+                    <Star key={i} size={14} fill="currentColor" />
+                  ))}
                 </div>
-                <div>
-                  <p className="font-bold text-white">{t.name}</p>
-                  <p className="text-sm text-gray-500">{t.role}</p>
+                <p className="text-zinc-300 text-sm leading-relaxed font-light mb-8 italic">
+                  &ldquo;{t.text}&rdquo;
+                </p>
+              </div>
+
+              <div className="pt-6 border-t border-white/[0.06]">
+                <h4 className="text-white font-semibold text-sm tracking-wide">{t.name}</h4>
+                <p className="text-xs text-zinc-400 font-light mt-0.5">{t.role}</p>
+                <div className="flex items-center gap-1.5 text-[11px] text-zinc-500 mt-2 font-mono">
+                  <MapPin size={11} className="text-zinc-400" />
+                  <span>{t.location}</span>
                 </div>
               </div>
-            ))}
-          </div>
+            </div>
+          ))}
         </div>
-
       </div>
     </section>
   );

@@ -3,20 +3,26 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useChat } from '@ai-sdk/react';
-import { MessageCircle, X, Send, Bot } from 'lucide-react';
+import type { UIMessage } from 'ai';
+import { MessageCircle, X, Send, Bot, Sparkles } from 'lucide-react';
 
 export default function ChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [input, setInput] = useState('');
-  
-  const { messages, sendMessage } = useChat({
+
+  const { messages, sendMessage, status } = useChat({
     messages: [
       {
         id: 'initial',
         role: 'assistant',
-        parts: [{ type: 'text', text: 'Hello. How can I help you find the perfect mesh or aluminium solution for your home today?' }]
-      }
-    ] as any
+        parts: [
+          {
+            type: 'text',
+            text: 'Hello. I am your architectural consultant at Perfect Mesh Solutions. How can I assist you with custom mosquito mesh or aluminium fabrication today?',
+          },
+        ],
+      },
+    ] as UIMessage[],
   });
 
   const handleQuickStart = (text: string) => {
@@ -29,7 +35,7 @@ export default function ChatWidget() {
 
   const handleSubmit = (e?: React.FormEvent) => {
     e?.preventDefault();
-    if (!input.trim()) return;
+    if (!input.trim() || status === 'streaming') return;
     sendMessage({ role: 'user', parts: [{ type: 'text', text: input.trim() }] });
     setInput('');
   };
@@ -43,101 +49,114 @@ export default function ChatWidget() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 20, scale: 0.95 }}
             transition={{ duration: 0.2 }}
-            className="fixed bottom-24 right-6 w-[350px] sm:w-[400px] h-[600px] max-h-[80vh] z-50 glass-panel rounded-2xl flex flex-col overflow-hidden shadow-2xl border border-white/10"
+            className="fixed bottom-20 inset-x-3 sm:inset-x-auto sm:right-6 sm:w-[400px] h-[540px] max-h-[78dvh] z-50 rounded-2xl flex flex-col overflow-hidden shadow-2xl border border-white/15 bg-[#0d0f12]/95 backdrop-blur-2xl"
           >
             {/* Header */}
-            <div className="p-4 border-b border-white/10 flex items-center justify-between bg-black/20">
+            <div className="p-4 border-b border-white/10 flex items-center justify-between bg-black/40">
               <div className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-full bg-accent text-background flex items-center justify-center">
-                  <Bot size={18} />
+                <div className="w-8 h-8 rounded-full bg-white text-black flex items-center justify-center font-bold text-xs shadow-md">
+                  <Bot size={16} />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-white">Smart Assistant</h3>
-                  <p className="text-xs text-green-400">Online</p>
+                  <h3 className="font-semibold text-white text-sm">Design Consultant</h3>
+                  <div className="flex items-center gap-1.5 text-[10px] text-emerald-400 font-mono">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                    <span>Gemini AI Connected</span>
+                  </div>
                 </div>
               </div>
-              <button 
+              <button
                 onClick={() => setIsOpen(false)}
-                className="text-gray-400 hover:text-white transition-colors"
-                title="Close chat"
+                className="text-zinc-400 hover:text-white p-1 rounded-lg hover:bg-white/10 transition-colors cursor-pointer"
+                aria-label="Close chat assistant"
               >
-                <X size={20} />
+                <X size={18} />
               </button>
             </div>
 
             {/* Messages Area */}
             <div className="flex-1 overflow-y-auto p-4 space-y-4 no-scrollbar">
-              {messages.map(m => (
+              {messages.map((m) => (
                 <div key={m.id} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                  <div 
-                    className={`max-w-[80%] p-3 rounded-2xl text-sm ${
-                      m.role === 'user' 
-                        ? 'bg-white text-black rounded-br-sm' 
-                        : 'glass border border-white/5 text-gray-200 rounded-bl-sm'
+                  <div
+                    className={`max-w-[85%] p-3.5 rounded-2xl text-xs sm:text-sm leading-relaxed ${
+                      m.role === 'user'
+                        ? 'bg-white text-black rounded-br-xs font-medium shadow-md'
+                        : 'bg-white/[0.04] border border-white/10 text-zinc-200 rounded-bl-xs'
                     }`}
                   >
-                    {m.parts?.map((part, idx) => 
+                    {m.parts?.map((part, idx) =>
                       part.type === 'text' ? <span key={idx}>{part.text}</span> : null
                     )}
                   </div>
                 </div>
               ))}
 
+              {status === 'streaming' && (
+                <div className="flex justify-start">
+                  <div className="p-3 rounded-2xl bg-white/[0.04] border border-white/10 text-zinc-400 text-xs flex items-center gap-2">
+                    <Sparkles size={12} className="animate-spin text-zinc-300" />
+                    <span>Consultant is composing recommendations...</span>
+                  </div>
+                </div>
+              )}
+
               {messages.length === 1 && (
-                <div className="flex flex-wrap gap-2 mt-4">
-                  <button onClick={() => handleQuickStart("Explore mosquito mesh options")} className="text-xs border border-white/20 rounded-full px-3 py-1.5 text-gray-300 hover:bg-white/10 transition-colors">Explore mosquito mesh</button>
-                  <button onClick={() => handleQuickStart("Get price estimate")} className="text-xs border border-white/20 rounded-full px-3 py-1.5 text-gray-300 hover:bg-white/10 transition-colors">Get price estimate</button>
-                  <button onClick={() => handleQuickStart("Book free measurement")} className="text-xs border border-white/20 rounded-full px-3 py-1.5 text-gray-300 hover:bg-white/10 transition-colors">Book free measurement</button>
+                <div className="flex flex-wrap gap-2 pt-2">
+                  <button
+                    onClick={() => handleQuickStart('What are the best options for large balcony slider doors?')}
+                    className="text-xs border border-white/15 rounded-full px-3 py-1.5 text-zinc-300 hover:bg-white/10 hover:text-white transition-colors cursor-pointer text-left"
+                  >
+                    Balcony Door Options
+                  </button>
+                  <button
+                    onClick={() => handleQuickStart('What is the difference between pleated and stainless mesh?')}
+                    className="text-xs border border-white/15 rounded-full px-3 py-1.5 text-zinc-300 hover:bg-white/10 hover:text-white transition-colors cursor-pointer text-left"
+                  >
+                    Pleated vs Stainless Mesh
+                  </button>
+                  <button
+                    onClick={() => handleQuickStart('How do I schedule a free home laser measurement?')}
+                    className="text-xs border border-white/15 rounded-full px-3 py-1.5 text-zinc-300 hover:bg-white/10 hover:text-white transition-colors cursor-pointer text-left"
+                  >
+                    Book Free Measurement
+                  </button>
                 </div>
               )}
             </div>
 
-            {/* WhatsApp Handoff / Input */}
-            <div className="p-4 bg-black/40 border-t border-white/10 backdrop-blur-xl">
-              {messages.length > 5 && (
-                <a 
-                  href="https://wa.me/917012715025?text=Hi!%20I%20would%20like%20to%20know%20more%20about%20Perfect%20Mesh%20Solutions." 
-                  target="_blank" rel="noreferrer"
-                  className="mb-3 w-full bg-[#25D366] text-white py-2 rounded-lg flex justify-center items-center gap-2 text-sm font-semibold hover:bg-[#20bd5a] transition-colors"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                  Continue on WhatsApp
-                </a>
-              )}
-              <form onSubmit={handleSubmit} className="flex items-center gap-2 relative">
-                <input
-                  value={input}
-                  onChange={handleInputChange}
-                  placeholder="Type your message..."
-                  className="w-full bg-white/5 border border-white/10 rounded-full py-3 px-4 pr-12 text-sm text-white focus:outline-none focus:border-accent"
-                />
-                <button 
-                  type="submit" 
-                  disabled={!input.trim()}
-                  className="absolute right-2 w-8 h-8 rounded-full bg-white text-black flex items-center justify-center disabled:opacity-50"
-                  title="Send message"
-                >
-                  <Send size={14} className="ml-0.5" />
-                </button>
-              </form>
-            </div>
+            {/* Input Bar */}
+            <form onSubmit={handleSubmit} className="p-3 border-t border-white/10 bg-black/40 flex items-center gap-2">
+              <input
+                type="text"
+                placeholder="Ask about systems, sizing, pricing..."
+                value={input}
+                onChange={handleInputChange}
+                className="flex-1 bg-white/[0.04] border border-white/10 rounded-xl px-3.5 py-2 text-xs text-white placeholder:text-zinc-500 focus:outline-none focus:border-white transition-colors"
+              />
+              <button
+                type="submit"
+                disabled={!input.trim() || status === 'streaming'}
+                className="p-2 rounded-xl bg-white text-black hover:bg-zinc-200 transition-colors disabled:opacity-30 cursor-pointer shadow-md"
+                aria-label="Send message"
+              >
+                <Send size={15} />
+              </button>
+            </form>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Floating Button */}
+      {/* Floating Toggle Button */}
       <motion.button
         onClick={() => setIsOpen(!isOpen)}
-        className="fixed bottom-6 right-6 w-14 h-14 bg-white text-black rounded-full shadow-[0_0_20px_rgba(255,255,255,0.3)] flex items-center justify-center z-50 hover:scale-105 transition-transform"
-        animate={{
-          boxShadow: isOpen 
-            ? "0 0 20px rgba(255,255,255,0.3)" 
-            : ["0 0 20px rgba(255,255,255,0.3)", "0 0 40px rgba(255,255,255,0.6)", "0 0 20px rgba(255,255,255,0.3)"]
-        }}
-        transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-        title="Open smart assistant"
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        className="fixed bottom-6 right-6 z-40 px-4 py-3.5 rounded-full bg-white text-black font-semibold text-xs tracking-wider uppercase flex items-center gap-2 shadow-[0_0_30px_rgba(255,255,255,0.25)] border border-white cursor-pointer hover:bg-zinc-200 transition-all"
+        aria-label="Open AI Assistant"
       >
-        {isOpen ? <X size={24} /> : <MessageCircle size={24} />}
+        <MessageCircle size={16} />
+        <span className="hidden sm:inline">Ask Consultant</span>
       </motion.button>
     </>
   );

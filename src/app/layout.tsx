@@ -22,8 +22,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${inter.variable} h-full antialiased dark `}>
-      <body className="min-h-full flex flex-col font-sans selection:bg-accent selection:text-background relative">
+    <html lang="en" className={`${inter.variable} h-full antialiased dark scroll-smooth`}>
+      <body className="min-h-full flex flex-col font-sans selection:bg-zinc-200 selection:text-black relative bg-[#080808] text-[#f4f4f5]">
         <Navbar />
         {children}
         <ChatWidget />
